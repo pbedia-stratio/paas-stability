@@ -4,3 +4,9 @@
 Kafka/project/project/
 Kafka/project/target/
 Kafka/target/
+target/
+
+#IDEA files
+.idea/
+*.iml
+
