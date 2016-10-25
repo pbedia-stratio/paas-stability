@@ -1,43 +1,37 @@
-
-# Viewer system testing project
+#  Paas-Stability
+# Stability tests for PaaS services
 
 ## Description
+Mavenized scala project to stress Paas services using Gatling (http://gatling.io/).
 
-Mavenized scala project to stress Viewer using Gatling (http://gatling.io/).
+In order to test the reliability of the Stratio PaaS, we have created a simple mechanism to execute 
+kind of stability tests that mimic the behaviour of a number of users interacting with the clusters.
+
+These users should interact with the frameworks installed within the Stratio PaaS and should perform 
+common operations, for instance: create a kafka topic and produce some messages, create and remove 
+zookeeper znods, run spark jobs...
+
+In order to do so we have created this project which using [Gatling](http://gatling.io/#/) will execute 
+a stability scenario against a running Stratio PaaS instance. 
 
 ## How it works
 
 Different maven profiles have been created to run the perf tests.
 
-### Populate profile
+## Running the scenario
 
-This maven profile should be executed if you want to automatically populate your Viewer instance with some Datasources, Dataviews and Widgets. Current this profile might be executed by running the following command:
+To run the scenario you just need to clone this repo and run the following command within the recently
+created repo:
 
-```sh
-$ mvn test -PPRE
 ```
-it works as following:
-
- - For each element within the sources_placeholders.json file the script will: create a datasource, a dataview, a page and a page-widget association.
- - For each page-widget association created the script will write an entry in the associationId.csv with the following info: DS,PWID (where DS is the Datasource name and the PWID is the id of the association). This file will be used as the feeder for the rest of the scripts to run the performance tests.
-
-IMPORTANT: This profile is not creating the widget anymore. This operation requires now to upload a zip file with the widget and we've not managed to upload the file using Gatling, so there is a val (widgetId ) where you should specify the id of the widget of the Viewer App that you will executed the tests against.
-
-If you have an already populated Viewer instance you can skip this profile execution and just manually create the associationId.csv feeder file with the datasource and page-widget associations that you want to run the performance tests against.
-
-### Run-all-the-performance-tests profile
-
-To run all the performance tests against all the DataSources defined within the associationId.csv feeder you should run the following command:
-
-```sh
-$ mvn test -PALL
+$ mvn gatling:execute 
 ```
 
-### Run-just-one-DS-tests profile
+### Run-just-one-service profile
 
-You might want to run the performance tests just for one of the Datasources defined within the associationId.csv feeder file. To do so run the following commands:
+You might want to run the performance tests just for one of the Services defined. To do so run the following commands:
 
 ```sh
-$ mvn test -P<DATASOURCE>
+$ mvn test -P<SERVICE>
 ```
-Where DATASOURCE is the Datasource to run the tests against (see the pom.xml file to find out the different profiles)
+Where SERVICE is the Service to run the tests against (see the pom.xml file to find out the different profiles)
