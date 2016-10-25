@@ -1,12 +1,9 @@
-# Created by .ignore support plugin (hsz.mobi)
-.gitignore
-.idea/
-Kafka/project/project/
-Kafka/project/target/
-Kafka/target/
-target/
-
-#IDEA files
-.idea/
+target
 *.iml
-
+*.ipr
+*.iws
+.idea
+out
+.project
+.classpath
+.settings
