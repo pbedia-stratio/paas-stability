@@ -1,14 +1,27 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.stratio</groupId>
+
+    <parent>
+        <groupId>com.stratio</groupId>
+        <artifactId>parent</artifactId>
+        <version>0.7.2</version>
+    </parent>
+
     <artifactId>paas-stability</artifactId>
     <packaging>jar</packaging>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.1.0-SNAPSHOT</version>
+
+    <name>Stratio Stability Tests</name>
+
 
     <properties>
+        <source.property>1.8</source.property>
+        <target.property>1.8</target.property>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <gatling-maven-plugin.version>2.1.7</gatling-maven-plugin.version>
         <gatling.version>2.1.7</gatling.version>
+        <scala-maven-plugin.version>3.2.2</scala-maven-plugin.version>
     </properties>
 
     <profiles>
@@ -29,7 +42,25 @@
                                 </goals>
                                 <configuration>
                                     <failOnError>true</failOnError>
-                                    <simulationClass>com.stratio.tests.kafka</simulationClass>
+                                    <simulationClass>com.stratio.tests.kafka.KafkaSimulation</simulationClass>
+                                    <configFolder>src/test/resources</configFolder>
+                                    <dataFolder>src/test/resources</dataFolder>
+                                    <resultsFolder>target/gatling/results</resultsFolder>
+                                    <!--<bodiesFolder>src/test/resources/request-bodies</bodiesFolder>-->
+                                    <!--<simulationsFolder>src/test/com/stratio/tests/kafka</simulationsFolder>-->
+                                    <!--<excludes> -->
+                                    <!--<exclude>advanced/*.scala</exclude> -->
+                                    <!--<exclude>basic/*.scala</exclude> -->
+                                    <!--</excludes> -->
+                                    <!-- <noReports>false</noReports> -->
+                                    <!-- <reportsOnly>directoryName</reportsOnly> -->
+                                    <!-- <simulationClass>foo.Bar</simulationClass> -->
+                                    <!-- <jvmArgs> -->
+                                    <!-- <jvmArg>-DmyExtraParam=foo</jvmArg> -->
+                                    <!-- </jvmArgs> -->
+                                    <!-- <fork>true</fork> -->
+                                    <!-- <propagateSystemProperties>true</propagateSystemProperties> -->
+                                    <!-- <failOnError>true</failOnError> -->
                                 </configuration>
                             </execution>
                         </executions>
@@ -54,7 +85,25 @@
                                 </goals>
                                 <configuration>
                                     <failOnError>true</failOnError>
-                                    <simulationClass>com.stratio.tests.zookeeper.ZookeeperSimulation</simulationClass>
+                                    <!--<simulationClass>com.stratio.tests.zookeeper.ZookeeperSimulation</simulationClass>-->
+                                    <configFolder>src/test/resources</configFolder>
+                                    <dataFolder>src/test/resources/data</dataFolder>
+                                    <resultsFolder>target/gatling/results</resultsFolder>
+                                    <bodiesFolder>src/test/resources/request-bodies</bodiesFolder>
+                                    <simulationsFolder>src/test/com/stratio/tests/zookeeper</simulationsFolder>
+                                    <!--<excludes> -->
+                                    <!--<exclude>advanced/*.scala</exclude> -->
+                                    <!--<exclude>basic/*.scala</exclude> -->
+                                    <!--</excludes> -->
+                                    <!-- <noReports>false</noReports> -->
+                                    <!-- <reportsOnly>directoryName</reportsOnly> -->
+                                    <!-- <simulationClass>foo.Bar</simulationClass> -->
+                                    <!-- <jvmArgs> -->
+                                    <!-- <jvmArg>-DmyExtraParam=foo</jvmArg> -->
+                                    <!-- </jvmArgs> -->
+                                    <!-- <fork>true</fork> -->
+                                    <!-- <propagateSystemProperties>true</propagateSystemProperties> -->
+                                    <!-- <failOnError>true</failOnError> -->
                                 </configuration>
                             </execution>
                         </executions>
@@ -70,6 +119,17 @@
             <version>${gatling.version}</version>
         </dependency>
         <dependency>
+            <groupId>io.gatling</groupId>
+            <artifactId>gatling-core</artifactId>
+            <version>${gatling.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.typesafe.akka</groupId>
+                    <artifactId>akka-actor_2.10</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
             <groupId>org.apache.curator</groupId>
             <artifactId>curator-framework</artifactId>
             <version>2.6.0</version>
@@ -78,11 +138,6 @@
             <groupId>org.apache.curator</groupId>
             <artifactId>curator-recipes</artifactId>
             <version>2.6.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.kafka</groupId>
-            <artifactId>kafka-clients</artifactId>
-            <version>0.8.2.0</version>
         </dependency>
     </dependencies>
 </project>
