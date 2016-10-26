@@ -2,7 +2,7 @@
     "records": [
         {
             "value": {
-                "foo": "amparo"
+                "foo": "${DATA}"
             }
         }
     ]
