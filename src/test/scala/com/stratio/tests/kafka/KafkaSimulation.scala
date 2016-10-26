@@ -18,7 +18,6 @@ class KafkaSimulation extends PerformanceTest {
       .exec(flattenMapIntoAttributes(fA))
         .exec(Prod.produceData)
 //    }
-    println (fA.get("TOPIC"))
   }
   )
 
@@ -44,26 +43,21 @@ trait PerformanceTest extends Simulation {
 
 
   object Prod {
+//    val HTTPproducer = "http://".concat(System.getProperty("REST_PROXY", "127.0.0.1:80")).concat("/topics/").concat(System.getProperty("TOPIC", "hola"))
     val HTTPproducer = "http://".concat(System.getProperty("REST_PROXY", "127.0.0.1:80")).concat("/topics/").concat(System.getProperty("TOPIC", "hola"))
-    println (HTTPproducer)
     val sentHeaders = Map("Content-Type" -> "application/vnd.kafka.json.v1+json")
-    println (sentHeaders)
     val produceData =
       forever(
         pace(5 seconds, 10 seconds).exec(
           http("POST /data")
             .post(HTTPproducer)
-            .headers(sentHeaders)
-            .body(ElFileBody("producerBody.txt")).asJSON
-//            .body(StringBody("""{"records":[{"value":{"foo":"amparo"}}]}"""
-//              .stripMargin)).asJSON
+            .body(ElFileBody("src/test/resources/data/producerBody.txt")).asJSON
+            .header("Content-Type","application/vnd.kafka.json.v1+json")
 //            .check(jsonPath("$.offsets")
-//            .check()
 //              .saveAs("response"))
 //            .check(responseTimeInMillis.lessThanOrEqual(10000L))
         )
       )
-    print(produceData)
   }
 
 
@@ -73,19 +67,6 @@ trait PerformanceTest extends Simulation {
   val injectDuration = Integer.parseInt(System.getProperty("injectD", "1"))
   val runDuration = Integer.parseInt(System.getProperty("runD", "1"))
 
-//  val dtopic = this.getClass.getSimpleName.replace("Data", "").toLowerCase
-
   val scns = new ListBuffer[ScenarioBuilder]()
-
-//  val HTTPproducer = "http://".concat(System.getProperty("BROKER_IP", "127.0.0.1")).concat("/topics/").concat(System.getProperty("TOPIC", "test"))
-//  val sentHeaders = Map("Content-Type" -> "application/vnd.kafka.json.v1+json")
-//
-//  val producerRequest = http("Producer url")
-//    .post(HTTPproducer)
-//    .headers(sentHeaders)
-//
-//  object order{
-//    val dataStart = new AtomicInteger(1)
-//  }
 }
 
