@@ -5,7 +5,6 @@ import java.util.concurrent.atomic.AtomicInteger
 import io.gatling.core.Predef._
 import io.gatling.core.structure.ScenarioBuilder
 import io.gatling.http.Predef._
-import io.gatling.http.request.ELFileBody
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable.ListBuffer
@@ -55,11 +54,11 @@ trait PerformanceTest extends Simulation {
           http("POST /data")
             .post(HTTPproducer)
             .headers(sentHeaders)
-            .body(ELFileBody("producerBody.txt")).asJSON
+            .body(ElFileBody("producerBody.txt")).asJSON
 //            .body(StringBody("""{"records":[{"value":{"foo":"amparo"}}]}"""
-              .stripMargin)).asJSON
+//              .stripMargin)).asJSON
 //            .check(jsonPath("$.offsets")
-            .check()
+//            .check()
 //              .saveAs("response"))
 //            .check(responseTimeInMillis.lessThanOrEqual(10000L))
         )
