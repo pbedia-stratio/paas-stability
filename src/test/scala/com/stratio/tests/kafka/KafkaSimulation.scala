@@ -1,77 +1,90 @@
 package com.stratio.tests.kafka
 
-import java.util.concurrent.atomic.AtomicInteger
-
 import io.gatling.core.Predef._
+import io.gatling.core.session.{Expression, SessionAttribute}
 import io.gatling.core.structure.ScenarioBuilder
-import io.gatling.http.Predef.{StringBody, http, responseTimeInMillis, jsonPath}
-import io.gatling.http.request.ELFileBody
+import io.gatling.http.Predef._
 import org.slf4j.LoggerFactory
+
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.duration._
 
 class KafkaSimulation extends PerformanceTest {
-  feederAssoc.records.foreach(fA => {
-    if (fA.get("TOPIC").get.equals(dtopic)) {
-      scns += scenario(dtopic.toUpperCase)
-        .exec(flattenMapIntoAttributes(fA))
-        .exec(Prod.produceData)
-    }
-  })
+    feederAssoc.records.foreach(fA => {
+    scns += scenario(fA.get("TOPIC").get)
+      .exec(flattenMapIntoAttributes(fA))
+        .exec(Cons.createConsumer)
+      .exec(Prod.produceData)
+    })
+
+  logger.info("Scenarios size: {}",scns.size )
+  if (scns.size < 1) {
+    throw new AssertionError("No scenarios")
+  }
 
   setUp(
-    scns.toList.map(_.inject(rampUsers(users) over (new DurationInt(injectDuration).seconds))))
-    .maxDuration(new DurationInt(runDuration).minutes)
+      scns.toList.map(_.inject(rampUsers(users) over (injectDuration))))
+    .maxDuration(1 minutes)
     .uniformPauses(5)
     .assertions(
-      global.responseTime.max.lessThan(3000),
-      global.successfulRequests.percent.greaterThan(95)
+        global.responseTime.max.lessThan(3000),
+        global.successfulRequests.percent.greaterThan(95)
     )
 
 }
 
-trait PerformanceTest extends Simulation {
+trait Headers {
+  val contentTypeValue: Expression[String] = "application/vnd.kafka.json.v1+json"
+  val contentType = "Content-Type"
+}
+
+trait PerformanceTest extends Simulation with Headers {
+
+  def logger = LoggerFactory.getLogger(this.getClass)
+
+
   object Prod {
-    val HTTPproducer = "http://".concat(System.getProperty("REST_PROXY", "127.0.0.1:80")).concat("/topics/").concat(System.getProperty("TOPIC", "hola"))
-    val sentHeaders = Map("Content-Type" -> "application/vnd.kafka.json.v1+json")
+    val HTTPproducer = "http://".concat(System.getProperty("REST_PROXY", "127.0.0.1:80")).concat("/topics/").concat("${TOPIC}")
     val produceData =
       forever(
         pace(5 seconds, 10 seconds).exec(
           http("POST /data")
             .post(HTTPproducer)
-            .headers(sentHeaders)
-            .body(StringBody(
-              """{
-                |"records":[{
-                |"value":{"foo":"amparo"}}]
-                |}""".stripMargin)).asJSON
-            .check(jsonPath("$")
-              .saveAs("response"))
-            .check(responseTimeInMillis.lessThanOrEqual(10000L))
+            .body(ElFileBody("src/test/resources/data/producerBody.txt")).asJSON
+            .header(contentType, contentTypeValue)
         )
+          .pause(5)
+          .exec(Cons.consumerData)
+      )
+  }
+
+  object Cons {
+    //    val HTTPproducer = "http://".concat(System.getProperty("REST_PROXY", "127.0.0.1:80")).concat("/topics/").concat(System.getProperty("TOPIC", "hola"))
+    val HTTPcreateConsumer = "http://".concat(System.getProperty("REST_PROXY", "127.0.0.1")).concat("/consumers/").concat("${CONSUMER}")
+    val HTTPobtainMsg = "http://".concat(System.getProperty("REST_PROXY", "127.0.0.1")).concat("/consumers/").concat("${CONSUMER}")
+      .concat("/instances/").concat("${CONSUMER}").concat("/topics/").concat("${TOPIC}")
+
+    val createConsumer =
+      http("POST /consumer")
+        .post(HTTPcreateConsumer)
+        .body(ElFileBody("src/test/resources/data/createConsumer.txt")).asJSON
+        .header(contentType, contentTypeValue)
+
+    val consumerData =
+        exec(
+          http("GET /data")
+            .get(HTTPobtainMsg)
+            .header("Accept","application/vnd.kafka.json.v1+json")
       )
   }
 
 
-  val feederAssoc = csv("associationId.csv")
+  val feederAssoc = csv("topicList.csv")
 
   val users = Integer.parseInt(System.getProperty("users", "1"))
   val injectDuration = Integer.parseInt(System.getProperty("injectD", "1"))
   val runDuration = Integer.parseInt(System.getProperty("runD", "1"))
 
-  val dtopic = this.getClass.getSimpleName.replace("Data", "").toLowerCase
-
   val scns = new ListBuffer[ScenarioBuilder]()
-
-//  val HTTPproducer = "http://".concat(System.getProperty("BROKER_IP", "127.0.0.1")).concat("/topics/").concat(System.getProperty("TOPIC", "test"))
-//  val sentHeaders = Map("Content-Type" -> "application/vnd.kafka.json.v1+json")
-//
-//  val producerRequest = http("Producer url")
-//    .post(HTTPproducer)
-//    .headers(sentHeaders)
-//
-//  object order{
-//    val dataStart = new AtomicInteger(1)
-//  }
 }
 

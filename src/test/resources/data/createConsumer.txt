@@ -1,0 +1,5 @@
+{
+    "name": "${CONSUMER}",
+    "format": "json",
+    "auto.offset.reset": "smallest"
+}
