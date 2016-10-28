@@ -7,9 +7,10 @@ import io.gatling.core.stats.message.ResponseTimings
 import io.gatling.core.structure.ScenarioContext
 import org.apache.curator.framework.CuratorFramework
 
-class CreateZnodes(val next: Action, ctx: ScenarioContext, curatorZookeeperClient: CuratorFramework) extends ChainableAction {
 
-  override def name: String = "Create znodes"
+class RemoveZnodes(val next: Action, ctx: ScenarioContext, curatorZookeeperClient: CuratorFramework) extends ChainableAction {
+
+  override def name: String = "Remove znodes"
   override def execute(session: Session) {
     var start: Long = 0L
     var end: Long = 0L
@@ -20,18 +21,18 @@ class CreateZnodes(val next: Action, ctx: ScenarioContext, curatorZookeeperClien
     try {
       val stat = curatorZookeeperClient.checkExists().forPath(znodePath)
       start = System.currentTimeMillis
-      if (stat == null) {
-        curatorZookeeperClient.create().forPath(znodePath)
+      if (stat != null) {
+        curatorZookeeperClient.delete().forPath(znodePath)
       }
       end = System.currentTimeMillis
     } catch {
       case e: Exception =>
         errorMessage = Some(e.getMessage)
-        logger.error(s"""Error creating znode with path: $znodePath""", e)
+        logger.error(s"""Error removing znode with path: $znodePath""", e)
         status = KO
     } finally {
       val responseTime = new ResponseTimings(start, end)
-      val requestName = "Create znodes"
+      val requestName = "Remove znodes"
       val message = errorMessage
       val extraInfo = Nil
       val responseCode: Option[String] = None
