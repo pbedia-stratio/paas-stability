@@ -8,6 +8,7 @@ import io.gatling.core.scenario.Simulation
 import io.gatling.core.structure.{ChainBuilder, ScenarioContext}
 import org.apache.curator.framework.CuratorFrameworkFactory
 import org.apache.curator.retry.ExponentialBackoffRetry
+import org.apache.zookeeper.data.Stat
 
 import scala.concurrent.duration._
 import scala.concurrent.forkjoin.ThreadLocalRandom
@@ -26,13 +27,17 @@ class ZookeeperSimulation extends Simulation {
 
   val createZnodes = new ActionBuilder {
     override def build(ctx: ScenarioContext, next: Action): Action = {
-      new CreateZnodes(next, ctx, curatorZookeeperClient)
+      val createMethod = {znode:String => curatorZookeeperClient.create().forPath(znode) }
+      val statusCheck = {stat:Stat => stat == null }
+      new ZnodeOperation(next, ctx, curatorZookeeperClient, "Create znode", statusCheck, createMethod)
     }
   }
 
   val removeZnodes = new ActionBuilder {
     override def build(ctx: ScenarioContext, next: Action): Action = {
-      new RemoveZnodes(next, ctx, curatorZookeeperClient)
+      val removeMethod = {znode:String => curatorZookeeperClient.delete().forPath(znode) }
+      val statusCheck = {stat:Stat => stat != null }
+      new ZnodeOperation(next, ctx, curatorZookeeperClient, "Remove znode", statusCheck, removeMethod)
     }
   }
 
