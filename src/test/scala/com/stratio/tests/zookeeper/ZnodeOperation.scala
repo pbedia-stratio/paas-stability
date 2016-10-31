@@ -8,8 +8,6 @@ import io.gatling.core.structure.ScenarioContext
 import org.apache.curator.framework.CuratorFramework
 import org.apache.zookeeper.data.Stat
 
-import scala.util.Try
-
 class ZnodeOperation(val next: Action,
                      ctx: ScenarioContext,
                      curatorZookeeperClient: CuratorFramework,
