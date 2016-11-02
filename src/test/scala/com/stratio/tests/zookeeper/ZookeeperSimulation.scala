@@ -15,6 +15,7 @@ import scala.concurrent.forkjoin.ThreadLocalRandom
 
 class ZookeeperSimulation extends Simulation {
 
+  val runDuration = Integer.parseInt(System.getProperty("runD", "1"))
   val servers = System.getProperty("SERVERS", "127.0.0.1:2181")
   val retryPolicy = new ExponentialBackoffRetry(1000, 3)
   val curatorZookeeperClient = CuratorFrameworkFactory.newClient(servers, retryPolicy)
@@ -58,7 +59,7 @@ class ZookeeperSimulation extends Simulation {
   }
 
   val createZnodeSetDataGetDataAndRemoveZnodes = ChainBuilder(List(createZnodes, setData, getData, removeZnodes))
-  val znodesCreationAndRemovingScenario = scenario("Create and remove znodes")
+  val znodesCreationAndRemovingScenario = scenario("Create, set data and get data and remove znode.")
     .feed(csv("src/test/resources/feeders/users.csv"))
     .exec { session =>
       session("group").validate[String].map { group =>
@@ -68,5 +69,5 @@ class ZookeeperSimulation extends Simulation {
       }
     }.forever(pace(1 seconds, 5 seconds).exec(createZnodeSetDataGetDataAndRemoveZnodes))
 
-  setUp(znodesCreationAndRemovingScenario.inject(rampUsers(2) over(15 seconds))).maxDuration(15 seconds)
+  setUp(znodesCreationAndRemovingScenario.inject(rampUsers(3) over(15 seconds))).maxDuration(runDuration minutes)
 }
