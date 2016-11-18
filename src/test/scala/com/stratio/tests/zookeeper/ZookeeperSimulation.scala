@@ -1,5 +1,7 @@
 package com.stratio.tests.zookeeper
 
+import com.stratio.tests.commons.TemporizedOperation
+import com.stratio.tests.commons.zookeeper.ZnodeHandler
 import io.gatling.core.Predef._
 import io.gatling.core.action.Action
 import io.gatling.core.action.builder.ActionBuilder
@@ -13,7 +15,7 @@ import org.apache.zookeeper.data.Stat
 import scala.concurrent.duration._
 import scala.concurrent.forkjoin.ThreadLocalRandom
 
-class ZookeeperSimulation extends Simulation {
+class ZookeeperSimulation extends Simulation with ZnodeHandler {
 
   val runDuration = Integer.parseInt(System.getProperty("runD", "1"))
   val servers = System.getProperty("SERVERS", "127.0.0.1:2181")
@@ -25,36 +27,60 @@ class ZookeeperSimulation extends Simulation {
     csv("src/test/resources/feeders/znodes.csv").records.groupBy{ record => record("group") }
   val znodesByGroup: Map[String, IndexedSeq[String]] =
     recordsByGroup.mapValues{ records => records.map {record => record("znode")} }
+  val genericErrorMessage = "Error performing the action: "
+
+  def getErrorMessage(actionName: String) = s"""$genericErrorMessage $actionName"""
 
   val createZnodes = new ActionBuilder {
     override def build(ctx: ScenarioContext, next: Action): Action = {
-      val createMethod = {znode:String => curatorZookeeperClient.create().forPath(znode) }
-      val statusCheck = {stat:Stat => stat == null }
-      new ZnodeOperation(next, ctx, curatorZookeeperClient, "Create znode", statusCheck, createMethod)
+      val statusCheck = { stat:Stat => stat == null }
+      val createZnode = { znode:String => curatorZookeeperClient.create().forPath(znode) }
+      val createZnodeOperation = { session: Session =>
+        znodeOperationBuilder(session, statusCheck, curatorZookeeperClient, createZnode) 
+      }
+      val actionName = "Create znode"
+      val errorMessage = getErrorMessage(actionName)
+      new TemporizedOperation(next, ctx, actionName, createZnodeOperation, Some(errorMessage))
     }
   }
 
   val setData = new ActionBuilder {
     override def build(ctx: ScenarioContext, next: Action): Action = {
-      val setDataMethod = {znode:String => curatorZookeeperClient.setData().forPath(znode, "test".getBytes()) }
-      val statusCheck = {stat:Stat => stat != null }
-      new ZnodeOperation(next, ctx, curatorZookeeperClient, "Set data", statusCheck, setDataMethod)
+      val statusCheck = { stat:Stat => stat != null }
+      val setZnode = { znode:String => curatorZookeeperClient.setData().forPath(znode, "test".getBytes()) }
+      val setZnodeOperation = { session: Session =>
+        znodeOperationBuilder(session, statusCheck, curatorZookeeperClient, setZnode)
+      }
+
+      val actionName = "Set data"
+      val errorMessage = getErrorMessage(actionName)
+      new TemporizedOperation(next, ctx, actionName, setZnodeOperation, Some(errorMessage))
     }
   }
 
   val getData = new ActionBuilder {
     override def build(ctx: ScenarioContext, next: Action): Action = {
-      val getDataMethod = {znode:String => curatorZookeeperClient.getData().forPath(znode) }
+      val getData = {znode:String => curatorZookeeperClient.getData().forPath(znode) }
       val statusCheck = {stat:Stat => stat != null }
-      new ZnodeOperation(next, ctx, curatorZookeeperClient, "Get data", statusCheck, getDataMethod)
+      val getZnodeOperation = { session: Session =>
+        znodeOperationBuilder(session, statusCheck, curatorZookeeperClient, getData)
+      }
+      val actionName = "Get data"
+      val errorMessage = getErrorMessage(actionName)
+      new TemporizedOperation(next, ctx, actionName, getZnodeOperation, Some(errorMessage))
     }
   }
 
   val removeZnodes = new ActionBuilder {
     override def build(ctx: ScenarioContext, next: Action): Action = {
-      val removeMethod = {znode:String => curatorZookeeperClient.delete().forPath(znode) }
-      val statusCheck = {stat:Stat => stat != null }
-      new ZnodeOperation(next, ctx, curatorZookeeperClient, "Remove znode", statusCheck, removeMethod)
+      val removeZnode = { znode:String => curatorZookeeperClient.delete().forPath(znode) }
+      val statusCheck = { stat:Stat => stat != null }
+      val getZnodeOperation = { session: Session =>
+        znodeOperationBuilder(session, statusCheck, curatorZookeeperClient, removeZnode)
+      }
+      val actionName = "Remove znode"
+      val errorMessage = getErrorMessage(actionName)
+      new TemporizedOperation(next, ctx, actionName, getZnodeOperation, Some(errorMessage))
     }
   }
 
