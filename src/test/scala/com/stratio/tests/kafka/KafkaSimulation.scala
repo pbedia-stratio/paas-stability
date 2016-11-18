@@ -23,9 +23,9 @@ class KafkaSimulation extends PerformanceTest {
   }
 
   setUp(
-      scns.toList.map(_.inject(rampUsers(users) over (injectDuration))))
-    .maxDuration(1 minutes)
-    .uniformPauses(5)
+      scns.toList.map(_.inject(rampUsers(users) over injectDuration)))
+    .maxDuration(runDuration minutes)
+//    .uniformPauses(5)
     .assertions(
         global.responseTime.max.lessThan(3000),
         global.successfulRequests.percent.greaterThan(95)
@@ -44,23 +44,36 @@ trait PerformanceTest extends Simulation with Headers {
 
 
   object Prod {
+
+    var contador = 0
+
+    val HTTPobtainMsg = "http://".concat(System.getProperty("REST_PROXY", "127.0.0.1")).concat("/consumers/").concat("${CONSUMER}").concat("-" + contador)
+      .concat("/instances/").concat("${CONSUMER}").concat("-" + contador).concat("/topics/").concat("${TOPIC}")
     val HTTPproducer = "http://".concat(System.getProperty("REST_PROXY", "127.0.0.1:80")).concat("/topics/").concat("${TOPIC}")
+
+    contador=contador+1
+
     val produceData =
       forever(
-        pace(5 seconds, 10 seconds).exec(
+        pace(1 seconds, 5 seconds).exec(
           http("POST /data")
             .post(HTTPproducer)
             .body(ElFileBody("src/test/resources/data/producerBody.txt")).asJSON
             .header(contentType, contentTypeValue)
+            .check(jsonPath("$.offsets..offset"))//.saveAs("my_offset"))
         )
-          .pause(5)
-          .exec(Cons.consumerData)
+          .pause(2)
+          .exec(http("GET /data")
+          .get(HTTPobtainMsg)
+          .header("Accept", contentTypeValue)
+//            .check(jsonPath("$.[0].offset").is("my_offset")))
+//          .check(regex("offset").findAll.exists)
+        )
       )
   }
 
   object Cons {
-    //    val HTTPproducer = "http://".concat(System.getProperty("REST_PROXY", "127.0.0.1:80")).concat("/topics/").concat(System.getProperty("TOPIC", "hola"))
-    val HTTPcreateConsumer = "http://".concat(System.getProperty("REST_PROXY", "127.0.0.1")).concat("/consumers/").concat("${CONSUMER}")
+    val HTTPcreateConsumer = "http://".concat(System.getProperty("REST_PROXY", "127.0.0.1")).concat("/consumers/").concat("${CONSUMER}").concat("-" + Prod.contador)
     val HTTPobtainMsg = "http://".concat(System.getProperty("REST_PROXY", "127.0.0.1")).concat("/consumers/").concat("${CONSUMER}")
       .concat("/instances/").concat("${CONSUMER}").concat("/topics/").concat("${TOPIC}")
 
@@ -71,11 +84,14 @@ trait PerformanceTest extends Simulation with Headers {
         .header(contentType, contentTypeValue)
 
     val consumerData =
-        exec(
+      pause(20)
+          .exec(
           http("GET /data")
             .get(HTTPobtainMsg)
-            .header("Accept","application/vnd.kafka.json.v1+json")
-      )
+            .header("Accept", contentTypeValue)
+//            .check(jsonPath("$.[0].offset").is())
+            .check(regex("offset").findAll.exists))
+//      )
   }
 
 
