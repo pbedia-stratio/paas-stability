@@ -25,7 +25,6 @@ class KafkaSimulation extends PerformanceTest {
   setUp(
       scns.toList.map(_.inject(rampUsers(users) over injectDuration)))
     .maxDuration(runDuration minutes)
-//    .uniformPauses(5)
     .assertions(
         global.responseTime.max.lessThan(3000),
         global.successfulRequests.percent.greaterThan(95)
@@ -44,14 +43,10 @@ trait PerformanceTest extends Simulation with Headers {
 
 
   object Prod {
-
-    var contador = 0
-
-    val HTTPobtainMsg = "http://".concat(System.getProperty("REST_PROXY", "127.0.0.1")).concat("/consumers/").concat("${CONSUMER}").concat("-" + contador)
-      .concat("/instances/").concat("${CONSUMER}").concat("-" + contador).concat("/topics/").concat("${TOPIC}")
+    val HTTPobtainMsg = "http://".concat(System.getProperty("REST_PROXY", "127.0.0.1")).concat("/consumers/").concat("${CONSUMER}")
+      .concat("/instances/").concat("${CONSUMER}").concat("/topics/").concat("${TOPIC}")
     val HTTPproducer = "http://".concat(System.getProperty("REST_PROXY", "127.0.0.1:80")).concat("/topics/").concat("${TOPIC}")
 
-    contador=contador+1
 
     val produceData =
       forever(
@@ -67,31 +62,19 @@ trait PerformanceTest extends Simulation with Headers {
           .get(HTTPobtainMsg)
           .header("Accept", contentTypeValue)
 //            .check(jsonPath("$.[0].offset").is("my_offset")))
-//          .check(regex("offset").findAll.exists)
+          .check(regex("offset").findAll.exists)
         )
       )
   }
 
   object Cons {
-    val HTTPcreateConsumer = "http://".concat(System.getProperty("REST_PROXY", "127.0.0.1")).concat("/consumers/").concat("${CONSUMER}").concat("-" + Prod.contador)
-    val HTTPobtainMsg = "http://".concat(System.getProperty("REST_PROXY", "127.0.0.1")).concat("/consumers/").concat("${CONSUMER}")
-      .concat("/instances/").concat("${CONSUMER}").concat("/topics/").concat("${TOPIC}")
-
+    val HTTPcreateConsumer = "http://".concat(System.getProperty("REST_PROXY", "127.0.0.1")).concat("/consumers/").concat("${CONSUMER}")
     val createConsumer =
       http("POST /consumer")
         .post(HTTPcreateConsumer)
         .body(ElFileBody("src/test/resources/data/createConsumer.txt")).asJSON
         .header(contentType, contentTypeValue)
-
-    val consumerData =
-      pause(20)
-          .exec(
-          http("GET /data")
-            .get(HTTPobtainMsg)
-            .header("Accept", contentTypeValue)
-//            .check(jsonPath("$.[0].offset").is())
-            .check(regex("offset").findAll.exists))
-//      )
+      )
   }
 
 
