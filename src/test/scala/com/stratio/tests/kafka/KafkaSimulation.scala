@@ -74,7 +74,6 @@ trait PerformanceTest extends Simulation with Headers {
         .post(HTTPcreateConsumer)
         .body(ElFileBody("src/test/resources/data/createConsumer.txt")).asJSON
         .header(contentType, contentTypeValue)
-      )
   }
 
 
