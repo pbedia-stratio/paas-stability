@@ -43,10 +43,8 @@ trait PerformanceTest extends Simulation with Headers {
 
 
   object Prod {
-    val HTTPobtainMsg = "http://".concat(System.getProperty("REST_PROXY", "127.0.0.1")).concat("/consumers/").concat("${CONSUMER}")
-      .concat("/instances/").concat("${CONSUMER}").concat("/topics/").concat("${TOPIC}")
-    val HTTPproducer = "http://".concat(System.getProperty("REST_PROXY", "127.0.0.1:80")).concat("/topics/").concat("${TOPIC}")
-
+    val HTTPobtainMsg = s"""http://${REST_PROXY}/consumers/$${CONSUMER}/instances/$${CONSUMER}/topics/$${TOPIC}"""
+    val HTTPproducer = s"""http://${REST_PROXY}/topics/$${TOPIC}"""
 
     val produceData =
       forever(
@@ -55,20 +53,19 @@ trait PerformanceTest extends Simulation with Headers {
             .post(HTTPproducer)
             .body(ElFileBody("src/test/resources/data/producerBody.txt")).asJSON
             .header(contentType, contentTypeValue)
-            .check(jsonPath("$.offsets..offset"))//.saveAs("my_offset"))
+            .check(jsonPath("$.offsets..offset"))
         )
           .pause(2)
           .exec(http("GET /data")
           .get(HTTPobtainMsg)
           .header("Accept", contentTypeValue)
-//            .check(jsonPath("$.[0].offset").is("my_offset")))
           .check(regex("offset").findAll.exists)
         )
       )
   }
 
   object Cons {
-    val HTTPcreateConsumer = "http://".concat(System.getProperty("REST_PROXY", "127.0.0.1")).concat("/consumers/").concat("${CONSUMER}")
+    val HTTPcreateConsumer = s"""http://${REST_PROXY}/consumers/$${CONSUMER}"""
     val createConsumer =
       http("POST /consumer")
         .post(HTTPcreateConsumer)
@@ -83,6 +80,7 @@ trait PerformanceTest extends Simulation with Headers {
   val injectDuration = Integer.parseInt(System.getProperty("injectD", "1"))
   val runDuration = Integer.parseInt(System.getProperty("runD", "1"))
 
+  val REST_PROXY = System.getProperty("REST_PROXY", "127.0.0.1")
   val scns = new ListBuffer[ScenarioBuilder]()
 }
 
