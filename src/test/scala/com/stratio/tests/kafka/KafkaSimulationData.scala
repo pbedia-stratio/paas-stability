@@ -9,13 +9,13 @@ import org.slf4j.LoggerFactory
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.duration._
 
-class KafkaSimulation extends PerformanceTestData {
-  feederAssoc.records.foreach(fA => {
+class KafkaSimulationData extends PerformanceTestData {
+    feederAssoc.records.foreach(fA => {
     producerScns += scenario(fA.get("TOPIC").get)
       .exec(flattenMapIntoAttributes(fA))
       .exec(Prod.produceData)
-  }
-  )
+    }
+    )
 
   feederAssoc.records.foreach(fA => {
     consumerScns += scenario(fA.get("CONSUMER").get)
@@ -33,17 +33,17 @@ class KafkaSimulation extends PerformanceTestData {
     producerScns.toList.map(_.inject(rampUsers(users) over injectDuration)) ::: consumerScns.toList.map(_.inject(rampUsers(1) over injectDuration)))
     .maxDuration(runDuration minutes)
     .assertions(
-//      global.responseTime.max.lessThan(3000),
-      global.successfulRequests.percent.greaterThan(95)
-    )
+//        global.responseTime.max.lessThan(3000),
+        global.successfulRequests.percent.greaterThan(95)
+  )
 }
 
-trait Headers {
+trait HeadersData {
   val contentTypeValue: Expression[String] = "application/vnd.kafka.json.v1+json"
   val contentType = "Content-Type"
 }
 
-trait PerformanceTest extends Simulation with Headers {
+trait PerformanceTestData extends Simulation with HeadersData {
 
   def logger = LoggerFactory.getLogger(this.getClass)
 
@@ -52,15 +52,15 @@ trait PerformanceTest extends Simulation with Headers {
     val HTTPproducer = s"""http://${REST_PROXY}/topics/$${TOPIC}"""
 
     val produceData =
-      forever {
+      during(produceDuration minutes) {
         pace(1 seconds, 5 seconds)
           .exec(
-            http("POST /data")
-              .post(HTTPproducer)
-              .body(ElFileBody("src/test/resources/data/producerBody.txt")).asJSON
-              .header(contentType, contentTypeValue)
-              .check(jsonPath("$.offsets..offset"))
-          )
+          http("POST /data")
+            .post(HTTPproducer)
+            .body(ElFileBody("src/test/resources/data/producerBody.txt")).asJSON
+            .header(contentType, contentTypeValue)
+            .check(jsonPath("$.offsets..offset"))
+        )
       }
   }
 
@@ -70,19 +70,17 @@ trait PerformanceTest extends Simulation with Headers {
 
 
     val consumeMessage =
-      forever {
-        pause(5)
-          .exec(
+        pause(produceDuration minutes)
+        .exec(
             http("POST /consumer")
               .post(HTTPcreateConsumer)
               .body(ElFileBody("src/test/resources/data/createConsumer.txt")).asJSON
               .header(contentType, contentTypeValue))
-          .pause(5)
-          .exec(http("GET /data")
-            .get(HTTPobtainMsg)
-            .header("Accept", contentTypeValue)
-            .check(regex("offset").findAll.exists))
-      }
+            .pause(5)
+        .exec(http("GET /data")
+              .get(HTTPobtainMsg)
+              .header("Accept", contentTypeValue)
+              .check(regex("offset").findAll.exists))
   }
 
 
@@ -90,7 +88,8 @@ trait PerformanceTest extends Simulation with Headers {
 
   val users = Integer.parseInt(System.getProperty("users", "1"))
   val injectDuration = Integer.parseInt(System.getProperty("injectD", "1"))
-  val runDuration = Integer.parseInt(System.getProperty("runD", "1"))
+  val runDuration = Integer.parseInt(System.getProperty("runD", "2"))
+  val produceDuration = (runDuration - 1)
   val REST_PROXY = System.getProperty("REST_PROXY", "127.0.0.1")
 
   val producerScns = new ListBuffer[ScenarioBuilder]()
