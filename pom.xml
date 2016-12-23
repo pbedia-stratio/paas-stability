@@ -23,6 +23,7 @@
         <gatling.version>2.2.3</gatling.version>
         <scala-maven-plugin.version>2.2.3</scala-maven-plugin.version>
         <crossdata.version>1.8.0-SNAPSHOT</crossdata.version>
+        <gosec-plugin.version>0.5.0-SNAPSHOT</gosec-plugin.version>
     </properties>
 
     <build>
@@ -187,6 +188,36 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>GOSEC</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>io.gatling</groupId>
+                        <artifactId>gatling-maven-plugin</artifactId>
+                        <version>${gatling-maven-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>Gosec</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>execute</goal>
+                                </goals>
+                                <configuration>
+                                    <failOnError>true</failOnError>
+                                    <simulationClass>com.stratio.tests.gosec.GosecSimulation</simulationClass>
+                                    <configFolder>src/test/resources/kerberos</configFolder>
+                                    <dataFolder>src/test/resources/data/gosec</dataFolder>
+                                    <resultsFolder>target/gatling/results/gosec</resultsFolder>
+                                    <bodiesFolder>src/test/resources/request-bodies</bodiesFolder>
+                                    <simulationsFolder>src/com/stratio/tests/gosec</simulationsFolder>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
     <dependencies>
         <dependency>
@@ -219,6 +250,11 @@
             <groupId>com.stratio.crossdata</groupId>
             <artifactId>crossdata-mesosphere-driver_2.11</artifactId>
             <version>${crossdata.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.stratio.gosec.dyplon.plugins</groupId>
+            <artifactId>dummy</artifactId>
+            <version>${gosec-plugin.version}</version>
         </dependency>
     </dependencies>
 </project>
