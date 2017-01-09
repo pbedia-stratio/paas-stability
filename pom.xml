@@ -22,8 +22,8 @@
         <gatling-maven-plugin.version>2.2.0</gatling-maven-plugin.version>
         <gatling.version>2.2.3</gatling.version>
         <scala-maven-plugin.version>2.2.3</scala-maven-plugin.version>
-        <crossdata.version>1.8.0-SNAPSHOT</crossdata.version>
-        <gosec-plugin.version>0.5.0-SNAPSHOT</gosec-plugin.version>
+        <crossdata.version>1.9.0-RC1</crossdata.version>
+        <gosec-plugin.version>0.5.0-RC1</gosec-plugin.version>
     </properties>
 
     <build>
@@ -234,6 +234,14 @@
                     <groupId>com.typesafe.akka</groupId>
                     <artifactId>akka-actor_2.10</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>com.typesafe.akka</groupId>
+                    <artifactId>akka-actor_2.11</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.typesafe.akka</groupId>
+                    <artifactId>akka-slf4j_2.11</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -250,11 +258,6 @@
             <groupId>com.stratio.crossdata</groupId>
             <artifactId>crossdata-mesosphere-driver_2.11</artifactId>
             <version>${crossdata.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.stratio.gosec.dyplon.plugins</groupId>
-            <artifactId>dummy</artifactId>
-            <version>${gosec-plugin.version}</version>
         </dependency>
     </dependencies>
 </project>

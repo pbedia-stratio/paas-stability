@@ -34,21 +34,35 @@ class CrossdataAction(val next: Action, ctx: ScenarioContext) extends ChainableA
 
   override def execute(session: Session) {
     val feeder = wrapAsJava.mapAsJavaMap(session.attributes)
-    val driverConf = new DriverConf()
+    var driverConf = new DriverConf()
     driverConf.setHttpHostAndPort(crossdataHost, crossdataPort)
-    val driver = Driver.http.newSession(feeder.get("user").toString,feeder.get("password").toString, driverConf)
+    driverConf.setEnableSsl(true)
+    driverConf.setKeyStorePath(keysotrePath)
+    driverConf.setKeyStorePwd(keystorePassword)
+    driverConf.setTrustStorePath(trustedstorePath)
+    driverConf.setTrustStorePwd(trustedstorePassword)
+    driverConf.setHttpClientIdleTimeout(30);
+    driverConf.setHttpHostConnectionPoolClientIdleTimeout(30);
+    var driver: Driver = null
+/*    try {*/
+      driver = Driver.http.newSession(feeder.get("user").toString, feeder.get("password").toString, driverConf)
+/*    } catch { case e: Exception =>
+      println(e.printStackTrace)
+    }*/
     var start: Long = 0L
     var end: Long = 0L
     var status: Status = OK
     var errorMessage: Option[String] = None
     try {
       start = System.currentTimeMillis
+      println("QUERY:" + feeder.get("query").toString)
       val resp = driver.sql(feeder.get("query").toString)
       val result = resp.waitForResult()
       if(result.hasError){
         logger.error("CROSSDATA QUERY EXCEPTION", result.hasError)
         status = KO
       }
+      status = OK
       end = System.currentTimeMillis
     } catch {
       case e: Exception =>
