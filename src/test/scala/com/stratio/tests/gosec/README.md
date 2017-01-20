@@ -21,14 +21,12 @@ Those files contain the configuration property used by project, please have a lo
 
 These are the environment variables that can be used to run simulation:
 
-These are the environment variables that can be used to run simulation:
-
-- **users** = define the number of users to perform simulation steps.
+- **users** = define the number of users to perform simulation steps.   
 - **injectD** = defines the user injection ramp.
 - **runD** = defines running duration.
 - **userName** = defines userId to instanciate the the plugin.
 - **InstanceArg** = defines plugin instance name
-- **manifestPath** = defines the path where the manifest is located (“../target/dummy-0.5.0-SNAPSHOT.jar)
+- **manifestPath** = defines the path where the manifest is located (“/.m2/../dummy-0.5.0-SNAPSHOT.jar)
 - **version** = defines the plugin version that will be invoqued
 
 ### Run performance test
