@@ -55,5 +55,5 @@ These are the environment variables that can be used to run simulation:
 To run Zookeeper performance test you should run the following command:
 
 ```sh
-$ mvn test -PZOOKEEPER -DSERVERS=zookeeper-sec.marathon.mesos:2181 -DSERVERS=zookeeper/zookeeper-plugin-agent@DEMO.STRATIO.COM
+$ mvn test -PZOOKEEPER -DSERVERS=zookeeper-sec.marathon.mesos:2181 -DPRINCIPAL=zookeeper/zookeeper-plugin-agent@DEMO.STRATIO.COM
 ```
