@@ -1,5 +1,5 @@
 
-# Zookeeper performance tests
+# Spark performance tests
 
 ## Description
 
@@ -20,9 +20,8 @@ These are the environment variables that can be used to run simulation:
 - **DCOS_USER**      	= defines DCOS admin user. (Ex. "admin@demo.stratio.com").
 - **REMOTE_USER**     	= defines user for remote ssh connection in cluster machines. (Ex. "root").
 - **REMOTE_PASSWORD**   = defines remote ssh password.
-- **MASTER_MESOS**     	= defines Mesos-Master of the cluster used to run the simulation. (Ex. "127.0.0.1").
-- **SERVICE_NAME**     	= defines service name used in PaaS deployement. (Ex. "spark1").
-
+- **MASTER_MESOS**     	= defines Mesos-Master of the cluster used to run the simulation. (Ex. "127.0.0.1")
+- **SERVICE_NAME**     	= defines service name used in PaaS deployement. (Ex. "spark1")
 - **RAMP_USERS**      	= defines the user injection ramp.
 - **TEST_DURATION**   	= defines running duration.
 
