@@ -145,7 +145,7 @@
                                 </goals>
                                 <configuration>
                                     <failOnError>true</failOnError>
-                                    <simulationClass>com.stratio.tests.viewer.viewerSimulation</simulationClass>
+                                    <simulationClass>com.stratio.tests.viewer.ViewerSimulation</simulationClass>
                                     <configFolder>src/test/resources</configFolder>
                                     <dataFolder>src/test/resources/data</dataFolder>
                                     <resultsFolder>target/gatling/results</resultsFolder>

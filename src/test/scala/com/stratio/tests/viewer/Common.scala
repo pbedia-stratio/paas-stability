@@ -3,8 +3,10 @@ package com.stratio.tests.viewer
 import java.util.concurrent.atomic.AtomicInteger
 
 import io.gatling.core.Predef._
+import io.gatling.core.feeder.RecordSeqFeederBuilder
 import io.gatling.core.structure.ScenarioBuilder
 import io.gatling.http.Predef.http
+import io.gatling.http.protocol.HttpProtocolBuilder
 import org.slf4j.LoggerFactory
 
 import scala.collection.mutable.ListBuffer
@@ -16,9 +18,9 @@ trait Common {
   val protocol = System.getProperty("PROTOCOL", "http")
   val port = System.getProperty("PORT", "9000")
   val url = System.getProperty("URL", "127.0.0.1")
-  val sut = s"${protocol}://${url}:${port}/api"
+  val sut = s"${protocol}://${url}:${port}"
 
-  val httpConf = http
+  val httpConf: HttpProtocolBuilder = http
     .baseURL(sut)
     .warmUp(sut)
     .acceptHeader("text/html,application/xhtml+xml,application/xml;application/zip,q=0.9,*/*;q=0.8")
@@ -30,12 +32,13 @@ trait Common {
     val dataStart = new AtomicInteger(1)
   }
 
-  val feederAssoc = csv("src/test/resources/data/viewer/associationId.csv")
+  val feederAssoc: RecordSeqFeederBuilder[String] =
+    csv("src/test/resources/data/viewer/associationId.csv")
 
+  val paceTime = Integer.parseInt(System.getProperty("pace","20"))
   val users = Integer.parseInt(System.getProperty("users", "1"))
   val injectDuration = Integer.parseInt(System.getProperty("injectD", "1"))
   val runDuration = Integer.parseInt(System.getProperty("runD", "1"))
 
-
-  val scns = new ListBuffer[ScenarioBuilder]()
+  val scenarios = new ListBuffer[ScenarioBuilder]()
 }
