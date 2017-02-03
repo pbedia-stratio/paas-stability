@@ -1,2 +1,2 @@
-DS,PWID
-crossdata,1
+Scenario,PageWidgetID,WidgetURL
+query1,1,/public/widgets/stratio/table_1485947786735/manifest.xml
