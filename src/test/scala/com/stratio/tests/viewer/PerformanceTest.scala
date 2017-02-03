@@ -57,7 +57,20 @@ trait PerformanceTest extends Simulation with Common {
         .check(responseTimeInMillis.lessThanOrEqual(100))
 
     val getIframe: HttpRequestBuilder = http("GET /ifr")
-      .get("")
+      .get("/gadgets/ifr")
+      .queryParamSeq(Seq(
+        ("url", sut + "${WidgetID}"),
+        ("container", "default"),
+        ("view", "home"),
+        ("lang", "en"),
+        ("country", "US"),
+        ("debug", 0),
+        ("nocache", 0),
+        ("sanitize", "%25sanitize%25"),
+        ("v", "dd5a6fcffba452689a93bd263486a423"),
+        ("testmode", 0),
+        ("parent", sut)
+      ))
       .check(responseTimeInMillis.lessThanOrEqual(100))
 
   }
