@@ -251,10 +251,5 @@
             <artifactId>crossdata-mesosphere-driver_2.11</artifactId>
             <version>${crossdata.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.stratio.gosec.dyplon.plugins</groupId>
-            <artifactId>dummy</artifactId>
-            <version>${gosec-plugin.version}</version>
-        </dependency>
     </dependencies>
 </project>
