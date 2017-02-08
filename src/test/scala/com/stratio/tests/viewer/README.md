@@ -16,7 +16,9 @@ Manual configuration should be performed before running simulation:
 - Create Crossdata datasource
 - Create Crossdata dataview
 - Create a new page with a TABLE widget using Crossdata dataview
-- Get pageWidget association and edit [associationId.csv](https://github.com/Stratio/paas-stability/blob/master/src/test/resources/data/viewer/associationId.csv) so _PWID_ is the same of the new TABLE widget.
+- Update [associationId.csv](https://github.com/Stratio/paas-stability/blob/master/src/test/resources/data/viewer/associationId.csv):
+  - `PageWidgetID`: widget id (unique widget id).
+  - `WidgetURL`: widget _manifest.xml_ url (unique hash id per installation).
 
 This file will be used as the feeder for the rest of the scripts to run the performance tests.
 
