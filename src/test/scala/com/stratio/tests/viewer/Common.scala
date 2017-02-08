@@ -39,6 +39,5 @@ trait Common {
   val users = Integer.parseInt(System.getProperty("users", "1"))
   val injectDuration = Integer.parseInt(System.getProperty("injectD", "1"))
   val runDuration = Integer.parseInt(System.getProperty("runD", "1"))
-
   val scenarios = new ListBuffer[ScenarioBuilder]()
 }

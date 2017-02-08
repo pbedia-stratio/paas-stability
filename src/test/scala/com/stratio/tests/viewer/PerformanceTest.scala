@@ -1,11 +1,11 @@
 package com.stratio.tests.viewer
 
 import io.gatling.core.Predef._
-import io.gatling.core.structure.ChainBuilder
 import io.gatling.http.Predef.{http, jsonPath, responseTimeInMillis}
 import io.gatling.http.request.builder.HttpRequestBuilder
 
 trait PerformanceTest extends Simulation with Common {
+  var thisco = ""
 
   object Auth {
     val auth: HttpRequestBuilder =
@@ -13,14 +13,14 @@ trait PerformanceTest extends Simulation with Common {
         .post("/api/login/authenticate/userpass")
         .body(ElFileBody("src/test/resources/data/viewer/AUTH.txt"))
         .asJSON
+        .check(responseTimeInMillis.lessThanOrEqual(500))
   }
 
   object Render{
-
-    val getRpc: HttpRequestBuilder =
-      http("GET /rpc")
-        .get("/rpc")
-        .queryParam("st","-1:-1:*:*:*:0:default")
+    val getRpc =
+      http("POST /rpc")
+        .post("/rpc")
+        .queryParam("st","-1%3A-1%3A*%3A*%3A*%3A0%3Adefault")
         .body(StringBody {
           """
             |[
@@ -44,35 +44,21 @@ trait PerformanceTest extends Simulation with Common {
             |        "rpcServiceIds",
             |        "tokenTTL"
             |      ],
-            |      "language":"en",
-            |      "country":"US",
+            |      "language":"es",
+            |      "country":"ALL",
             |      "userId":"@viewer",
             |      "groupId":"@self"
             |    }
             |  }
             |]
-          """.stripMargin
-        })
-        .asJSON
-        .check(responseTimeInMillis.lessThanOrEqual(100))
+          """.stripMargin}).asJSON
+        .check(jsonPath("$[0].result.*.iframeUrls.home").ofType[String].saveAs("ifrUrl"))
 
-    val getIframe: HttpRequestBuilder = http("GET /ifr")
-      .get("/gadgets/ifr")
-      .queryParamSeq(Seq(
-        ("url", sut + "${WidgetID}"),
-        ("container", "default"),
-        ("view", "home"),
-        ("lang", "en"),
-        ("country", "US"),
-        ("debug", 0),
-        ("nocache", 0),
-        ("sanitize", "%25sanitize%25"),
-        ("v", "dd5a6fcffba452689a93bd263486a423"),
-        ("testmode", 0),
-        ("parent", sut)
-      ))
-      .check(responseTimeInMillis.lessThanOrEqual(100))
 
+    val getIframe =
+      http("GET /ifr")
+          .get("${ifrUrl}")
+          .check(responseTimeInMillis.lessThanOrEqual(10000))
   }
 
   object Data {
@@ -92,7 +78,6 @@ trait PerformanceTest extends Simulation with Common {
           """.stripMargin
         })
         .asJSON
-        .check(responseTimeInMillis.lessThanOrEqual(20000))
+        .check(responseTimeInMillis.lessThanOrEqual(10000))
   }
 }
-

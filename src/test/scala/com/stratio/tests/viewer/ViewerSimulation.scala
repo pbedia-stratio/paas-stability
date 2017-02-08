@@ -6,9 +6,11 @@ import scala.concurrent.duration.DurationInt
 class ViewerSimulation extends PerformanceTest {
 
   feederAssoc.records.foreach(feeder => {
-    scenarios += scenario(feeder("DS"))
+    scenarios += scenario(feeder("Scenario"))
       .exec(flattenMapIntoAttributes(feeder))
       .exec(Auth.auth)
+      .exec(Render.getRpc)
+      .exec(Render.getIframe)
       .exec(Data.getData)
   })
 
@@ -26,7 +28,7 @@ class ViewerSimulation extends PerformanceTest {
     .maxDuration(runDuration minutes)
     .protocols(httpConf)
     .assertions {
-      global.responseTime.max.lte(50)
+      global.responseTime.max.lte(5000)
       global.successfulRequests.percent.gte(90)
     }
 }

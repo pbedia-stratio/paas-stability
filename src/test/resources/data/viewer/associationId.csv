@@ -1,2 +1,2 @@
-Scenario,PageWidgetID,WidgetURL,WidgetID
-query1,1,/public/widgets/stratio/table_1485947786735/manifest.xml,/public/widgets/stratio/table_1485947786735/manifest.xml
+Scenario,PageWidgetID,WidgetURL
+query1,17,http://viewer.demo.stratio.com:9000/public/widgets/stratio/wordCloud_1486389487478/manifest.xml
