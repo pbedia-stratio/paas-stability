@@ -1,17 +1,21 @@
 package com.stratio.tests.viewer
 
 import io.gatling.core.Predef._
+
 import scala.concurrent.duration.DurationInt
 
 class ViewerSimulation extends PerformanceTest {
 
   feederAssoc.records.foreach(feeder => {
     scenarios += scenario(feeder("Scenario"))
-      .exec(flattenMapIntoAttributes(feeder))
       .exec(Auth.auth)
-      .exec(Render.getRpc)
-      .exec(Render.getIframe)
-      .exec(Data.getData)
+      .exec(flattenMapIntoAttributes(feeder))
+      .forever {
+          exec(Render.getRpc)
+            .exec(Render.getIframe)
+            .exec(Data.getData)
+            .pace(paceTime)
+      }
   })
 
   logger.debug("Scenarios size: {}", scenarios.size )
