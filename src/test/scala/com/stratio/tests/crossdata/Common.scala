@@ -4,7 +4,7 @@ import io.gatling.core.Predef._
 
 trait Common {
 
-  val fedderCrossdata = separatedValues(System.getProperty("SCENARIO", "crossdatafeeder.csv"),'"', '|').circular
+  val feederCrossdata = separatedValues(System.getProperty("SCENARIO", "crossdatafeeder.csv"),'"', '|').circular
 
   val crossdataHost = System.getProperty("CROSSDATA_HOST", "127.0.0.1")
   val crossdataPort = Integer.parseInt(System.getProperty("CROSSDATA_PORT", "13422"))

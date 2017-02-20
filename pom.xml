@@ -35,6 +35,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <meminitial>1024m</meminitial>
+                    <maxmem>4048m</maxmem>
+                </configuration>
             </plugin>
         </plugins>
     </build>
@@ -175,7 +179,7 @@
                                 </goals>
                                 <configuration>
                                     <failOnError>true</failOnError>
-                                    <simulationClass>com.stratio.tests.crossdata.CrossdataSimulation</simulationClass>
+                                    <simulationClass>com.stratio.tests.crossdata.CrossdataSimulationHugo</simulationClass>
                                     <configFolder>src/test/resources</configFolder>
                                     <dataFolder>src/test/resources/data/crossdata</dataFolder>
                                     <resultsFolder>target/gatling/results/crossdata</resultsFolder>
@@ -211,6 +215,36 @@
                                     <resultsFolder>target/gatling/results/gosec</resultsFolder>
                                     <bodiesFolder>src/test/resources/request-bodies</bodiesFolder>
                                     <simulationsFolder>src/com/stratio/tests/gosec</simulationsFolder>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>CROSSDATAJDBC</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>io.gatling</groupId>
+                        <artifactId>gatling-maven-plugin</artifactId>
+                        <version>${gatling-maven-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>Crossdata</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>execute</goal>
+                                </goals>
+                                <configuration>
+                                    <failOnError>true</failOnError>
+                                    <simulationClass>com.stratio.tests.crossdata.CrossdataSimulationJDBC</simulationClass>
+                                    <configFolder>src/test/resources</configFolder>
+                                    <dataFolder>src/test/resources/data/crossdata</dataFolder>
+                                    <resultsFolder>target/gatling/results/crossdata</resultsFolder>
+                                    <bodiesFolder>src/test/resources/request-bodies</bodiesFolder>
+                                    <simulationsFolder>src/com/stratio/tests/crossdata</simulationsFolder>
                                 </configuration>
                             </execution>
                         </executions>
@@ -258,6 +292,17 @@
             <groupId>com.stratio.crossdata</groupId>
             <artifactId>crossdata-mesosphere-driver_2.11</artifactId>
             <version>${crossdata.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.gatling</groupId>
+            <artifactId>gatling-jdbc</artifactId>
+            <version>${gatling.version}</version>
+        </dependency>
+        <dependency>
+            <!-- WARNING! jdbc must be installed locally -->
+            <groupId>com.stratio.jdbc</groupId>
+            <artifactId>stratio-crossdata-mesosphere-jdbc4</artifactId>
+            <version>1.9.0-RC1</version>
         </dependency>
     </dependencies>
 </project>
